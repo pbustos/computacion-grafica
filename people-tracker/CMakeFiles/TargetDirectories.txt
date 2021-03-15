@@ -1,6 +1,0 @@
-/home/robo02/robocomp/components/computacion-grafica/people-tracker/CMakeFiles/rebuild_cache.dir
-/home/robo02/robocomp/components/computacion-grafica/people-tracker/CMakeFiles/edit_cache.dir
-/home/robo02/robocomp/components/computacion-grafica/people-tracker/CMakeFiles/ui_mainUI.dir
-/home/robo02/robocomp/components/computacion-grafica/people-tracker/src/CMakeFiles/rebuild_cache.dir
-/home/robo02/robocomp/components/computacion-grafica/people-tracker/src/CMakeFiles/edit_cache.dir
-/home/robo02/robocomp/components/computacion-grafica/people-tracker/src/CMakeFiles/ICES__home_robo02_robocomp_components_computacion-grafica_people-tracker_src.dir
