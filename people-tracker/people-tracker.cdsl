@@ -1,0 +1,15 @@
+import "CameraRGBDSimplePub.idsl";
+import "HumanCameraBody.idsl";
+import "AprilTagsServer.idsl";
+
+Component peopletracker
+{
+	Communications
+	{
+	    requires AprilTagsServer;
+	    subscribesTo HumanCameraBody, CameraRGBDSimplePub;
+	};
+	language python;
+    gui Qt(QWidget);
+};
+
