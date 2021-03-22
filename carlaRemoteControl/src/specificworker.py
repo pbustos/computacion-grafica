@@ -29,6 +29,8 @@ from DualControl import DualControl
 from HUD import HUD
 from Logger import Logger
 from SensorManager import CameraManager, GNSSSensor, IMUSensor
+import numpy as np
+from math import tan
 
 
 class SpecificWorker(GenericWorker):
@@ -101,6 +103,32 @@ class SpecificWorker(GenericWorker):
             self.hud.tick(self, self.clock, control)
         self.camera_manager.render(self.display)
         self.hud.render(self.display)
+
+        puntoDer = np.array([3,0.5,0.1])
+        puntoIzq = np.array([3,-0.5,0.1])
+        camara = np.array([0.0,-0.25,1.0])
+
+        puntoPintarDer = puntoDer-camara
+        puntoPintarIzq = puntoIzq-camara
+
+
+        #semejanza de triangulos
+        f = 320.0/np.tan(np.radians(110.0/2.0))
+        iDer = (f*puntoPintarDer[1])/puntoPintarDer[0] + self.width/2
+        jDer = (f*puntoPintarDer[2])/puntoPintarDer[0] + self.height/2
+        jDer = self.height - jDer
+
+        print('-----------',puntoPintarDer[1], puntoPintarIzq[1] )
+
+        iIzq = (f * puntoPintarIzq[1]) / puntoPintarIzq[0] + self.width / 2
+        jIzq = (f * puntoPintarIzq[2]) / puntoPintarIzq[0] + self.height / 2
+        jIzq = self.height - jIzq;
+
+        print('Der',jDer, iDer)
+        print('Izq',jIzq, iIzq)
+
+        pygame.draw.circle(self.display, (0,0,255), [iDer, jDer], 5)
+        pygame.draw.circle(self.display, (0, 0, 255), [iIzq, jIzq], 5)
         pygame.display.flip()
 
         return True
