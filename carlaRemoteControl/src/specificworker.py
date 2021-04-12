@@ -107,13 +107,34 @@ class SpecificWorker(GenericWorker):
             self.hud.tick(self, self.clock, control)
         self.camera_manager.render(self.display)
         self.hud.render(self.display)
-        #comentario
-        puntoDer = np.array([3,0.5,0.1])
-        puntoIzq = np.array([3,-0.5,0.1])
+
+        # Calculo de velocidad. Se obtendra el timestamp actual en formato unix (segundos), latitud y longitud.
+        # Obtenidos los valores se calcula la velocidad
+        aux_latitude = self.latitude
+        aux_longitude = self.longitude
+        self.latitude = self.gnss_sensor.latitude
+        self.longitude = self.gnss_sensor.longitude
+        km = self.getDistanceFromLatLonInKm(aux_latitude, aux_longitude, self.latitude,
+                                            self.longitude)  # Distancia en km
+
+        aux_timestamp = self.timestamp
+        self.timestamp = self.gnss_sensor.timestamp
+        speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
+
+        #Obtencion puntos
+        puntoDer = np.array([3*(speed/24)+1,0.5,0.1])
+        puntoIzq = np.array([3*(speed/24)+1,-0.5,0.1])
+
+        faroDer = np.array([1, 1, 0.1])
+        faroIzq = np.array([1, -1, 0.1])
+
         camara = np.array([0.0,-0.25,1.0])
 
         puntoPintarDer = puntoDer-camara
         puntoPintarIzq = puntoIzq-camara
+
+        pintarFaroDer = faroDer - camara
+        pintarFaroIzq = faroIzq - camara
 
 
         #semejanza de triangulos
@@ -122,33 +143,38 @@ class SpecificWorker(GenericWorker):
         jDer = (f*puntoPintarDer[2])/puntoPintarDer[0] + self.height/2
         jDer = self.height - jDer
 
+        iFaroDer = (f * pintarFaroDer[1]) / pintarFaroDer[0] + self.width / 2
+        jFaroDer = (f * pintarFaroDer[2]) / pintarFaroDer[0] + self.height / 2
+        jFaroDer = self.height - jFaroDer
+
         #print('-----------',puntoPintarDer[1], puntoPintarIzq[1] )
 
         iIzq = (f * puntoPintarIzq[1]) / puntoPintarIzq[0] + self.width / 2
         jIzq = (f * puntoPintarIzq[2]) / puntoPintarIzq[0] + self.height / 2
         jIzq = self.height - jIzq;
 
+        iFaroIzq = (f * pintarFaroIzq[1]) / pintarFaroIzq[0] + self.width / 2
+        jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
+        jFaroIzq = self.height - jFaroIzq;
+
         #print('Der',jDer, iDer)
         #print('Izq',jIzq, iIzq)
 
+        """
         pygame.draw.circle(self.display, (0,0,255), [int(iDer), int(jDer)], 5)
         pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq), int(jIzq)], 5)
+
+        pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroDer), int(jFaroDer)], 5)
+        pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroIzq), int(jFaroIzq)], 5)
+        """
+
+
+
+        pygame.draw.polygon(self.display, (0, 0, 255),
+                            [(iFaroIzq, jFaroIzq), (iFaroDer, jFaroDer), (iDer, jDer), (iIzq, jIzq)])
         pygame.display.flip()
 
-        # Calculo de velocidad. Se obtendra el timestamp actual en formato unix (segundos), latitud y longitud.
-        # Obtenidos los valores se calcula la velocidad
-        aux_latitude = self.latitude
-        aux_longitude = self.longitude
-        self.latitude = self.gnss_sensor.latitude
-        self.longitude = self.gnss_sensor.longitude
-        km = self.getDistanceFromLatLonInKm(aux_latitude, aux_longitude, self.latitude, self.longitude) # Distancia en km
 
-        aux_timestamp = self.timestamp
-        self.timestamp = self.gnss_sensor.timestamp
-        speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
-
-        if (speed > 0):
-            print(speed, 'km/h')
         return True
 
     def getDistanceFromLatLonInKm(self, lat1, lon1, lat2, lon2):
