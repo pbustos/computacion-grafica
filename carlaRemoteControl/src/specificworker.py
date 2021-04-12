@@ -103,7 +103,7 @@ class SpecificWorker(GenericWorker):
             self.hud.tick(self, self.clock, control)
         self.camera_manager.render(self.display)
         self.hud.render(self.display)
-
+        #comentario
         puntoDer = np.array([3,0.5,0.1])
         puntoIzq = np.array([3,-0.5,0.1])
         camara = np.array([0.0,-0.25,1.0])
