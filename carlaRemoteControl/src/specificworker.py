@@ -30,11 +30,15 @@ from HUD import HUD
 from Logger import Logger
 from SensorManager import CameraManager, GNSSSensor, IMUSensor
 import numpy as np
-from math import tan
 
+from math import sin, cos, sqrt, atan2, radians
+import time
 
 class SpecificWorker(GenericWorker):
     logger_signal = Signal(str, str, str)
+    latitude = 0
+    longitude = 0
+    timestamp = 0
 
     def __init__(self, proxy_map, startup_check=False):
         super(SpecificWorker, self).__init__(proxy_map)
@@ -56,11 +60,11 @@ class SpecificWorker(GenericWorker):
         self.controller = None
         self.clock = pygame.time.Clock()
 
-        data_to_save = {
+        self.data_to_save = {
             'control': ['Time', 'Throttle', 'Steer', 'Brake', 'Gear', 'Handbrake', 'Reverse', 'Manualgear'],
             'communication': ['Time', 'CommunicationTime']
         }
-        self.logger = Logger(self.melexlogger_proxy, 'carlaRemoteControl', data_to_save)
+        self.logger = Logger(self.melexlogger_proxy, 'carlaRemoteControl', self.data_to_save)
         self.logger_signal.connect(self.logger.publish_to_logger)
 
         self.Period = 0
@@ -118,21 +122,53 @@ class SpecificWorker(GenericWorker):
         jDer = (f*puntoPintarDer[2])/puntoPintarDer[0] + self.height/2
         jDer = self.height - jDer
 
-        print('-----------',puntoPintarDer[1], puntoPintarIzq[1] )
+        #print('-----------',puntoPintarDer[1], puntoPintarIzq[1] )
 
         iIzq = (f * puntoPintarIzq[1]) / puntoPintarIzq[0] + self.width / 2
         jIzq = (f * puntoPintarIzq[2]) / puntoPintarIzq[0] + self.height / 2
         jIzq = self.height - jIzq;
 
-        print('Der',jDer, iDer)
-        print('Izq',jIzq, iIzq)
+        #print('Der',jDer, iDer)
+        #print('Izq',jIzq, iIzq)
 
-        pygame.draw.circle(self.display, (0,0,255), [iDer, jDer], 5)
-        pygame.draw.circle(self.display, (0, 0, 255), [iIzq, jIzq], 5)
+        pygame.draw.circle(self.display, (0,0,255), [int(iDer), int(jDer)], 5)
+        pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq), int(jIzq)], 5)
         pygame.display.flip()
 
+        # Calculo de velocidad. Se obtendra el timestamp actual en formato unix (segundos), latitud y longitud.
+        # Obtenidos los valores se calcula la velocidad
+        aux_latitude = self.latitude
+        aux_longitude = self.longitude
+        self.latitude = self.gnss_sensor.latitude
+        self.longitude = self.gnss_sensor.longitude
+        km = self.getDistanceFromLatLonInKm(aux_latitude, aux_longitude, self.latitude, self.longitude) # Distancia en km
+
+        aux_timestamp = self.timestamp
+        self.timestamp = self.gnss_sensor.timestamp
+        speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
+
+        if (speed > 0):
+            print(speed, 'km/h')
         return True
 
+    def getDistanceFromLatLonInKm(self, lat1, lon1, lat2, lon2):
+        R = 6373.0  # Radius of the earth in km
+        dLat = radians(lat2 - lat1)
+        dLon = radians(lon2 - lon1)
+        rLat1 = radians(lat1)
+        rLat2 = radians(lat2)
+        a = sin(dLat / 2) * sin(dLat / 2) + cos(rLat1) * cos(rLat2) * sin(dLon / 2) * sin(dLon / 2)
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        d = R * c * 1000  # Distance in m
+        return d
+
+    def calc_velocity(self, dist_km, time_start, time_end):
+        """Return 0 if time_start == time_end, avoid dividing by 0"""
+        dt = (time_end - time_start)
+        if dt == 0:
+            return 0
+
+        return (dist_km / dt) * 3.6 if time_end > time_start else 0
     def startup_check(self):
         QTimer.singleShot(200, QApplication.instance().quit)
 
@@ -149,7 +185,7 @@ class SpecificWorker(GenericWorker):
     # SUBSCRIPTION to updateSensorGNSS method from CarlaSensors interface
     #
     def CarlaSensors_updateSensorGNSS(self, gnssData):
-        print(gnssData.latitude, gnssData.longitude)
+        #print(gnssData.latitude, gnssData.longitude)
         self.gnss_sensor.update(gnssData.latitude, gnssData.longitude, gnssData.altitude, gnssData.frame,
                                 gnssData.timestamp)
 
