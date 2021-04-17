@@ -172,9 +172,9 @@ class SpecificWorker(GenericWorker):
                             [(iFaroIzq, jFaroIzq), (iFaroDer, jFaroDer), (iDer, jDer), (iIzq, jIzq)])
         """
         #Dibujo del poligono representado por lineas para una mejor visualizacion 
-        pygame.draw.line(self.display, (0, 0, 255), [iFaroIzq, jFaroIzq], [iIzq, jIzq])
-        pygame.draw.line(self.display, (0, 0, 255), [iIzq, jIzq], [iDer, jDer])
-        pygame.draw.line(self.display, (0, 0, 255), [iDer, jDer], [iFaroDer, jFaroDer])"""
+        pygame.draw.line(self.display, (0, 0, 255), (iFaroIzq, jFaroIzq), (iIzq, jIzq))
+        pygame.draw.line(self.display, (0, 0, 255), (iIzq, jIzq), (iDer, jDer))
+        pygame.draw.line(self.display, (0, 0, 255), (iDer, jDer), (iFaroDer, jFaroDer))"""
         
         pygame.display.flip()
 
