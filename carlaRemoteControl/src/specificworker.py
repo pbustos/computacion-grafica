@@ -20,8 +20,8 @@
 #
 from genericworker import *
 import traceback
-
 import pygame
+import pygame.gfxdraw
 from PySide2.QtCore import QTimer, Signal
 from PySide2.QtWidgets import QApplication
 
@@ -108,6 +108,13 @@ class SpecificWorker(GenericWorker):
         self.camera_manager.render(self.display)
         self.hud.render(self.display)
 
+        # Calculo del ángulo de  giro
+        print('giro---',self.controller._control_steer)
+        if self.controller._control_steer == 0.0:
+            alfa = (np.pi/2) * 0.0000001
+        else:
+            alfa = (np.pi/2) * self.controller._control_steer
+
         # Calculo de velocidad. Se obtendra el timestamp actual en formato unix (segundos), latitud y longitud.
         # Obtenidos los valores se calcula la velocidad
         aux_latitude = self.latitude
@@ -121,9 +128,21 @@ class SpecificWorker(GenericWorker):
         self.timestamp = self.gnss_sensor.timestamp
         speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
 
+
         #Obtencion puntos
-        puntoDer = np.array([3*(speed/24)+1,0.5,0.1])
-        puntoIzq = np.array([3*(speed/24)+1,-0.5,0.1])
+
+        # Si va hacia delante, calculo poligono
+        if (not self.controller._control_reverse):
+            # Si está en movimiento, calculo puntos con velocidad y angulo de giro
+            if (speed > 0 ):
+                puntoDer = np.array([3*(speed/24)+1,0.5 + alfa,0.1])
+                puntoIzq = np.array([3*(speed/24)+1,-0.5 + alfa,0.1])
+            else: # Si no está en movimiento, no se tiene en cuenta el giro
+                puntoDer = np.array([3 * (speed / 24) + 1, 0.5, 0.1])
+                puntoIzq = np.array([3 * (speed / 24) + 1, -0.5, 0.1])
+        else: # Si va hacia detrás
+            puntoDer = np.array([3 * (0 / 24) + 1, 0.5, 0.1])
+            puntoIzq = np.array([3 * (0 / 24) + 1, -0.5, 0.1])
 
         faroDer = np.array([1, 1, 0.1])
         faroIzq = np.array([1, -1, 0.1])
@@ -168,14 +187,9 @@ class SpecificWorker(GenericWorker):
         pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroIzq), int(jFaroIzq)], 5)
         """
         
-        pygame.draw.polygon(self.display, (0, 0, 255),
-                            [(iFaroIzq, jFaroIzq), (iFaroDer, jFaroDer), (iDer, jDer), (iIzq, jIzq)])
-        """
-        #Dibujo del poligono representado por lineas para una mejor visualizacion 
-        pygame.draw.line(self.display, (0, 0, 255), (iFaroIzq, jFaroIzq), (iIzq, jIzq))
-        pygame.draw.line(self.display, (0, 0, 255), (iIzq, jIzq), (iDer, jDer))
-        pygame.draw.line(self.display, (0, 0, 255), (iDer, jDer), (iFaroDer, jFaroDer))"""
-        
+        pygame.gfxdraw.polygon(self.display,
+                            [(iFaroIzq, jFaroIzq), (iFaroDer, jFaroDer), (iDer, jDer), (iIzq, jIzq)],
+                               (0, 0, 255))
         pygame.display.flip()
 
 

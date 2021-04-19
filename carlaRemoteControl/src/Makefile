@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl
+CMAKE_SOURCE_DIR = /home/salabeta/ComputacionGrafica/computacion-grafica/carlaRemoteControl/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl
+CMAKE_BINARY_DIR = /home/salabeta/ComputacionGrafica/computacion-grafica/carlaRemoteControl/src
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,14 +80,14 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(CMAKE_COMMAND) -E cmake_progress_start /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl/CMakeFiles /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl/src/CMakeFiles/progress.marks
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(MAKE) -f CMakeFiles/Makefile2 src/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/salabeta/ComputacionGrafica/computacion-grafica/carlaRemoteControl/src/CMakeFiles /home/salabeta/ComputacionGrafica/computacion-grafica/carlaRemoteControl/src/CMakeFiles/progress.marks
+	$(MAKE) -f CMakeFiles/Makefile2 all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/salabeta/ComputacionGrafica/computacion-grafica/carlaRemoteControl/src/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(MAKE) -f CMakeFiles/Makefile2 src/clean
+	$(MAKE) -f CMakeFiles/Makefile2 clean
 .PHONY : clean
 
 # The main clean target
@@ -97,33 +97,31 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	$(MAKE) -f CMakeFiles/Makefile2 preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(MAKE) -f CMakeFiles/Makefile2 src/preinstall
+	$(MAKE) -f CMakeFiles/Makefile2 preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-# Convenience name for target.
-src/CMakeFiles/ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src.dir/rule:
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(MAKE) -f CMakeFiles/Makefile2 src/CMakeFiles/ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src.dir/rule
-.PHONY : src/CMakeFiles/ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src.dir/rule
+#=============================================================================
+# Target rules for targets named ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src
 
-# Convenience name for target.
-ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src: src/CMakeFiles/ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src.dir/rule
-
-.PHONY : ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src
+# Build rule for target.
+ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src
+.PHONY : ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src
 
 # fast build rule for target.
-ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src/fast:
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(MAKE) -f src/CMakeFiles/ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src.dir/build.make src/CMakeFiles/ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src.dir/build
-.PHONY : ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src/fast
+ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src/fast:
+	$(MAKE) -f CMakeFiles/ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src.dir/build.make CMakeFiles/ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src.dir/build
+.PHONY : ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src/fast
 
 # Help Target
 help:
@@ -133,7 +131,7 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... ICES__home_salabeta_robocomp_components_melex-rodao_components_carlaRemoteControl_src"
+	@echo "... ICES__home_salabeta_ComputacionGrafica_computacion-grafica_carlaRemoteControl_src"
 .PHONY : help
 
 
@@ -145,6 +143,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/salabeta/robocomp/components/melex-rodao/components/carlaRemoteControl && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
