@@ -1,0 +1,6 @@
+/home/salabeta/robocomp/components/computacion-grafica-main/people-tracker/CMakeFiles/rebuild_cache.dir
+/home/salabeta/robocomp/components/computacion-grafica-main/people-tracker/CMakeFiles/edit_cache.dir
+/home/salabeta/robocomp/components/computacion-grafica-main/people-tracker/CMakeFiles/ui_mainUI.dir
+/home/salabeta/robocomp/components/computacion-grafica-main/people-tracker/src/CMakeFiles/rebuild_cache.dir
+/home/salabeta/robocomp/components/computacion-grafica-main/people-tracker/src/CMakeFiles/edit_cache.dir
+/home/salabeta/robocomp/components/computacion-grafica-main/people-tracker/src/CMakeFiles/ICES__home_salabeta_robocomp_components_computacion-grafica-main_people-tracker_src.dir
