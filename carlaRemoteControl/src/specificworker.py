@@ -30,6 +30,9 @@ from HUD import HUD
 from Logger import Logger
 from SensorManager import CameraManager, GNSSSensor, IMUSensor
 import numpy as np
+from numpy import cos as np_cos
+from numpy import sin as np_sin
+
 
 from math import sin, cos, sqrt, atan2, radians
 import time
@@ -129,7 +132,7 @@ class SpecificWorker(GenericWorker):
         speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
 
 
-        #Obtencion puntos
+        """#Obtencion puntos
 
         # Si va hacia delante, calculo poligono
         if (not self.controller._control_reverse):
@@ -145,10 +148,100 @@ class SpecificWorker(GenericWorker):
             puntoIzq = np.array([3 * (0 / 24) + 1, -0.5, 0.1])
 
         faroDer = np.array([1, 1, 0.1])
+        faroIzq = np.array([1, -1, 0.1])"""
+
+        camara = np.array([0.0, -0.25, 1.0])
+        faroDer = np.array([1, 1, 0.1])
         faroIzq = np.array([1, -1, 0.1])
 
-        camara = np.array([0.0,-0.25,1.0])
+        #R = 2
+        N = 50
+        # vt = speed / 3.6  # (para pasar de km /h a m/s)
+        vt = (15 * (speed / 24)) / 3.6
+        R = 0.5 * vt
+        if (speed !=0):
+            if((alfa > 0.01 or alfa < -0.01) and speed > 0):
+                if(alfa > 0.01):
+                    R = -R
 
+                print(vt)
+                arc_T_izq = np.linspace(0, vt / R, N)
+                arc_T_dcho = np.linspace(0, vt / R, N)
+
+                X_izq, Y_izq = self.parametric_circle(arc_T_izq, faroIzq[1], faroIzq[0], R)
+                X_dcho, Y_dcho = self.parametric_circle(arc_T_dcho, faroDer[1], faroDer[0], R)
+                Z_izq = Z_dcho = np.full(N, faroDer[2])
+
+                puntoPintarIzqX = X_izq - camara[1]
+                puntoPintarIzqY = Y_izq - camara[0]
+                puntoPintarDchoX = X_dcho - camara[1]
+                puntoPintarDchoY = Y_dcho - camara[0]
+                puntoPintarIzqZ = Z_izq - camara[2]
+                puntoPintarDchoZ = Z_dcho - camara[2]
+
+                puntoPintarIzqX = puntoPintarIzqX - R
+                puntoPintarDchoX = puntoPintarDchoX - R
+
+                # Semejanza de Triangulos
+                f = 320.0 / np.tan(np.radians(110.0 / 2.0))
+                iIzq = (f * puntoPintarIzqX) / puntoPintarIzqY + self.width / 2
+                jIzq = (f * puntoPintarIzqZ) / puntoPintarIzqY + self.height / 2
+                jIzq = self.height - jIzq;
+
+                iDer = (f * puntoPintarDchoX) / puntoPintarDchoY + self.width / 2
+                jDer = (f * puntoPintarDchoZ) / puntoPintarDchoY + self.height / 2
+                jDer = self.height - jDer
+
+                for i in range(N):
+                    pygame.draw.circle(self.display, (0, 0, 255), [int(iDer[i]), int(jDer[i])], 5)
+                    pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq[i]), int(jIzq[i])], 5)
+            else:
+                print('voy recto')
+                # Si va hacia delante, calculo poligono
+                if (not self.controller._control_reverse):
+                    # Si está en movimiento, calculo puntos con velocidad y angulo de giro
+                    if (speed > 0):
+                        puntoDer = np.array([3 * (speed / 24) + 1, 0.5 + alfa, 0.1])
+                        puntoIzq = np.array([3 * (speed / 24) + 1, -0.5 + alfa, 0.1])
+                    else:  # Si no está en movimiento, no se tiene en cuenta el giro
+                        puntoDer = np.array([3 * (speed / 24) + 1, 0.5, 0.1])
+                        puntoIzq = np.array([3 * (speed / 24) + 1, -0.5, 0.1])
+                else:  # Si va hacia detrás
+                    puntoDer = np.array([3 * (0 / 24) + 1, 0.5, 0.1])
+                    puntoIzq = np.array([3 * (0 / 24) + 1, -0.5, 0.1])
+
+                puntoPintarDer = puntoDer - camara
+                puntoPintarIzq = puntoIzq - camara
+
+                pintarFaroDer = faroDer - camara
+                pintarFaroIzq = faroIzq - camara
+
+                # semejanza de triangulos
+                f = 320.0 / np.tan(np.radians(110.0 / 2.0))
+                iDer = (f * puntoPintarDer[1]) / puntoPintarDer[0] + self.width / 2
+                jDer = (f * puntoPintarDer[2]) / puntoPintarDer[0] + self.height / 2
+                jDer = self.height - jDer
+
+                iFaroDer = (f * pintarFaroDer[1]) / pintarFaroDer[0] + self.width / 2
+                jFaroDer = (f * pintarFaroDer[2]) / pintarFaroDer[0] + self.height / 2
+                jFaroDer = self.height - jFaroDer
+
+                # print('-----------',puntoPintarDer[1], puntoPintarIzq[1] )
+
+                iIzq = (f * puntoPintarIzq[1]) / puntoPintarIzq[0] + self.width / 2
+                jIzq = (f * puntoPintarIzq[2]) / puntoPintarIzq[0] + self.height / 2
+                jIzq = self.height - jIzq;
+
+                iFaroIzq = (f * pintarFaroIzq[1]) / pintarFaroIzq[0] + self.width / 2
+                jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
+                jFaroIzq = self.height - jFaroIzq;
+
+                pygame.draw.line(self.display, (0,0,255), (iFaroIzq, jFaroIzq), (iIzq, jIzq), 5)
+                pygame.draw.line(self.display, (0, 0, 255), (iFaroDer, jFaroDer), (iDer, jDer), 5)
+
+
+
+        """     
         puntoPintarDer = puntoDer-camara
         puntoPintarIzq = puntoIzq-camara
 
@@ -176,24 +269,28 @@ class SpecificWorker(GenericWorker):
         jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
         jFaroIzq = self.height - jFaroIzq;
 
-        #print('Der',jDer, iDer)
-        #print('Izq',jIzq, iIzq)
 
-        """
-        pygame.draw.circle(self.display, (0,0,255), [int(iDer), int(jDer)], 5)
+
+                pygame.draw.circle(self.display, (0,0,255), [int(iDer), int(jDer)], 5)
         pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq), int(jIzq)], 5)
 
         pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroDer), int(jFaroDer)], 5)
         pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroIzq), int(jFaroIzq)], 5)
-        """
+        
         
         pygame.gfxdraw.polygon(self.display,
                             [(iFaroIzq, jFaroIzq), (iFaroDer, jFaroDer), (iDer, jDer), (iIzq, jIzq)],
-                               (0, 0, 255))
+                               (0, 0, 255))"""
+
         pygame.display.flip()
 
 
         return True
+
+    def parametric_circle(self, t, xc, yc, R):
+        x = xc + R * np_cos(t)
+        y = yc + R * np_sin(t)
+        return x, y
 
     def getDistanceFromLatLonInKm(self, lat1, lon1, lat2, lon2):
         R = 6373.0  # Radius of the earth in km
