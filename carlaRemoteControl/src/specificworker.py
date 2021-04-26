@@ -158,12 +158,12 @@ class SpecificWorker(GenericWorker):
         N = 50
         # vt = speed / 3.6  # (para pasar de km /h a m/s)
         vt = (15 * (speed / 24)) / 3.6
-        R = 0.5 * vt
+
+        R = vt / alfa
+        R = -R
+
         if (speed !=0):
             if((alfa > 0.01 or alfa < -0.01) and speed > 0):
-                if(alfa > 0.01):
-                    R = -R
-
                 print(vt)
                 arc_T_izq = np.linspace(0, vt / R, N)
                 arc_T_dcho = np.linspace(0, vt / R, N)
@@ -196,7 +196,6 @@ class SpecificWorker(GenericWorker):
                     pygame.draw.circle(self.display, (0, 0, 255), [int(iDer[i]), int(jDer[i])], 5)
                     pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq[i]), int(jIzq[i])], 5)
             else:
-                print('voy recto')
                 # Si va hacia delante, calculo poligono
                 if (not self.controller._control_reverse):
                     # Si está en movimiento, calculo puntos con velocidad y angulo de giro
