@@ -154,10 +154,8 @@ class SpecificWorker(GenericWorker):
         faroDer = np.array([1, 1, 0.1])
         faroIzq = np.array([1, -1, 0.1])
 
-        #R = 2
         N = 50
-        # vt = speed / 3.6  # (para pasar de km /h a m/s)
-        vt = (15 * (speed / 24)) / 3.6
+        vt = (15 * (speed / 24)) / 3.6 #(para pasar de km /h a m/s)
 
         R = vt / alfa
         R = -R
