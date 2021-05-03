@@ -26,6 +26,11 @@ class CameraManager(object):
         self.current_image_height = height
         self.current_image_ID = cameraID
 
+    def get_image_for_yolo(self, camera_id):
+        if camera_id in self.images_received.keys():
+            image = self.images_received[camera_id]
+            return np.frombuffer(image.image, np.uint8).reshape(image.height, image.width, 4)
+
     def convert_img(self):
         for camera_ID, camera_data in self.images_received.items():
 
@@ -87,6 +92,7 @@ class IMUSensor(object):
         self.timestamp = 0
 
     def update(self, acc, gyro, compass, frame, timestamp):
+        
         self.accelerometer = acc
         self.gyroscope = gyro
         self.compass = compass
