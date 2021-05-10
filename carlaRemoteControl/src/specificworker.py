@@ -48,8 +48,8 @@ class SpecificWorker(GenericWorker):
     def __init__(self, proxy_map, startup_check=False):
         super(SpecificWorker, self).__init__(proxy_map)
 
-        self.d = Detector(gpu_id=0, config_path='/home/salabeta/ComputacionGrafica/darknet/cfg/yolov4-tiny.cfg',
-                          weights_path='/home/salabeta/ComputacionGrafica/darknet/yolov4-tiny.weights')
+        self.d = Detector(gpu_id=0, config_path='/home/salabeta/ComputacionGrafica/darknet/cfg/yolov4.cfg',
+                          weights_path='/home/salabeta/ComputacionGrafica/darknet/yolov4.weights')
 
         self.width = 1280
         self.height = 720
@@ -164,6 +164,8 @@ class SpecificWorker(GenericWorker):
         R = vt / alfa
         R = -R
 
+        #self.detect_with_yolo()
+
         if (speed != 0):
             if ((alfa > 0.01 or alfa < -0.01) and speed > 0):
                 print(vt)
@@ -193,6 +195,8 @@ class SpecificWorker(GenericWorker):
                 iDer = (f * puntoPintarDchoX) / puntoPintarDchoY + self.width / 2
                 jDer = (f * puntoPintarDchoZ) / puntoPintarDchoY + self.height / 2
                 jDer = self.height - jDer
+
+                self.detect_with_yolo(iDer[-1], jDer[-1], iIzq[-1], jIzq[-1])
 
                 for i in range(N):
                     pygame.draw.circle(self.display, (0, 0, 255), [int(iDer[i]), int(jDer[i])], 5)
@@ -237,16 +241,19 @@ class SpecificWorker(GenericWorker):
                 jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
                 jFaroIzq = self.height - jFaroIzq;
 
-                self.detect_with_yolo()
+                self.detect_with_yolo(iDer, jDer, iIzq, jIzq)
 
                 pygame.draw.line(self.display, (0, 0, 255), (iFaroIzq, jFaroIzq), (iIzq, jIzq), 5)
                 pygame.draw.line(self.display, (0, 0, 255), (iFaroDer, jFaroDer), (iDer, jDer), 5)
+
+        else:
+            self.detect_with_yolo(0,0,0,0)
 
         pygame.display.flip()
 
         return True
 
-    def detect_with_yolo(self):
+    def detect_with_yolo(self, iDer, jDer, iIzq, jIzq):
         # surf = pygame.Surface(
         # (self.d.network_width(), self.d.network_height()))  # I'm going to use 100x200 in examples
         # data = pygame.image.tostring(surf, 'RGBA')
@@ -266,22 +273,29 @@ class SpecificWorker(GenericWorker):
                 cv2.line(img_yolo, (x, y), (x + w, y), (0, 255, 0), thickness=4)
                 cv2.line(img_yolo, (x, y + h), (x + w, y + h), (0, 255, 0), thickness=4)
                 cv2.line(img_yolo, (x + w, y), (x + w, y + h), (0, 255, 0), thickness=4)
-                x = int(x * 1280 / 416)
-                h = int(h * 720 / 416)
-                y = int(y * 720 / 416)
-                w = int(w * 1280 / 416)
-                # imgs.append(box)
+                x = int(x * 1280 / self.d.network_width())
+                h = int(h * 720 / self.d.network_width())
+                y = int(y * 720 / self.d.network_width())
+                w = int(w * 1280 / self.d.network_width())
+
                 print(f'{detection.class_name.ljust(10)} | {detection.class_confidence * 100:.1f} % | {i}')
-                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x, y + h), 3)
-                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x + w, y), 3)
-                pygame.draw.line(self.display, (0, 255, 0), (x, y + h), (x + w, y + h), 3)
-                pygame.draw.line(self.display, (0, 255, 0), (x + w, y), (x + w, y + h), 3)
+                detection_color = (0,255,0)
+                print('@@@@', iDer, 720 - jDer)
+
+                if (((x > iIzq and x < iDer) or (x + w > iIzq and x + w < iDer) or (x < iIzq and x + w > iDer)) and y + h > jDer):
+                    # se detecta objeto, pintamos en rojo
+                    detection_color = (255,0,0)
+
+                pygame.draw.line(self.display, detection_color, (x, y), (x, y + h), 3)
+                pygame.draw.line(self.display, detection_color, (x, y), (x + w, y), 3)
+                pygame.draw.line(self.display, detection_color, (x, y + h), (x + w, y + h), 3)
+                pygame.draw.line(self.display, detection_color, (x + w, y), (x + w, y + h), 3)
 
                 pygame.font.init()  # you have to call this at the start,
                 # if you want to use this module.
                 myfont = pygame.font.SysFont('Comic Sans MS', 30)
 
-                textsurface = myfont.render(detection.class_name.ljust(10), False, (0, 255, 0))
+                textsurface = myfont.render(detection.class_name.ljust(10), False, detection_color)
 
                 self.display.blit(textsurface, (x, y))
 
