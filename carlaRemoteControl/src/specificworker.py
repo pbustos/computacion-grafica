@@ -33,9 +33,10 @@ import numpy as np
 from numpy import cos as np_cos
 from numpy import sin as np_sin
 
-
 from math import sin, cos, sqrt, atan2, radians
-import time
+import cv2
+from PIL import Image
+from yolov4 import Detector
 
 class SpecificWorker(GenericWorker):
     logger_signal = Signal(str, str, str)
@@ -45,6 +46,9 @@ class SpecificWorker(GenericWorker):
 
     def __init__(self, proxy_map, startup_check=False):
         super(SpecificWorker, self).__init__(proxy_map)
+
+        self.d = Detector(gpu_id=0, config_path='/home/salabeta/ComputacionGrafica/darknet/cfg/yolov4-tiny.cfg',
+                          weights_path='/home/salabeta/ComputacionGrafica/darknet/yolov4-tiny.weights')
 
         self.width = 1280
         self.height = 720
@@ -233,8 +237,11 @@ class SpecificWorker(GenericWorker):
                 jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
                 jFaroIzq = self.height - jFaroIzq;
 
+                self.detect_with_yolo()
+
                 pygame.draw.line(self.display, (0,0,255), (iFaroIzq, jFaroIzq), (iIzq, jIzq), 5)
                 pygame.draw.line(self.display, (0, 0, 255), (iFaroDer, jFaroDer), (iDer, jDer), 5)
+
 
 
 
@@ -283,6 +290,37 @@ class SpecificWorker(GenericWorker):
 
 
         return True
+
+    def detect_with_yolo(self):
+        #surf = pygame.Surface(
+           # (self.d.network_width(), self.d.network_height()))  # I'm going to use 100x200 in examples
+        #data = pygame.image.tostring(surf, 'RGBA')
+
+        img_arr = self.camera_manager.get_image_for_yolo(0)
+        if img_arr is not None:
+            # cv2.imshow('title', img_arr)
+            img_arr = cv2.cvtColor(img_arr, cv2.COLOR_BGRA2BGR)
+            img = Image.fromarray(img_arr)
+            img_yolo = np.array(img.resize((self.d.network_width(), self.d.network_height())))
+            detections = self.d.perform_detect(image_path_or_buf=img_yolo, show_image=True)
+            print(len(detections))
+            for detection in detections:
+                i = detection.left_x, detection.top_y, detection.width, detection.height
+                x, y, w, h = detection.left_x, detection.top_y, detection.width, detection.height
+                cv2.line(img_yolo, (x, y), (x, y + h), (0, 255, 0), thickness=4)
+                cv2.line(img_yolo, (x, y), (x + w, y), (0, 255, 0), thickness=4)
+                cv2.line(img_yolo, (x, y + h), (x + w, y + h), (0, 255, 0), thickness=4)
+                cv2.line(img_yolo, (x + w, y), (x + w, y + h), (0, 255, 0), thickness=4)
+                x = int(x * 1280 / 416)
+                h = int(h * 720 / 416)
+                y = int(y * 720 / 416)
+                w = int(w * 1280 / 416)
+                # imgs.append(box)
+                print(f'{detection.class_name.ljust(10)} | {detection.class_confidence * 100:.1f} % | {i}')
+                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x, y + h))
+                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x + w, y))
+                pygame.draw.line(self.display, (0, 255, 0), (x, y + h), (x + w, y + h))
+                pygame.draw.line(self.display, (0, 255, 0), (x + w, y), (x + w, y + h))
 
     def parametric_circle(self, t, xc, yc, R):
         x = xc + R * np_cos(t)
