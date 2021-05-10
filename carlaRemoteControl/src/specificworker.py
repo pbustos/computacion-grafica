@@ -190,7 +190,7 @@ class SpecificWorker(GenericWorker):
                 f = 320.0 / np.tan(np.radians(110.0 / 2.0))
                 iIzq = (f * puntoPintarIzqX) / puntoPintarIzqY + self.width / 2
                 jIzq = (f * puntoPintarIzqZ) / puntoPintarIzqY + self.height / 2
-                jIzq = self.height - jIzq;
+                jIzq = self.height - jIzq
 
                 iDer = (f * puntoPintarDchoX) / puntoPintarDchoY + self.width / 2
                 jDer = (f * puntoPintarDchoZ) / puntoPintarDchoY + self.height / 2
