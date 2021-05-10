@@ -38,6 +38,7 @@ import cv2
 from PIL import Image
 from yolov4 import Detector
 
+
 class SpecificWorker(GenericWorker):
     logger_signal = Signal(str, str, str)
     latitude = 0
@@ -116,11 +117,11 @@ class SpecificWorker(GenericWorker):
         self.hud.render(self.display)
 
         # Calculo del ángulo de  giro
-        print('giro---',self.controller._control_steer)
+        print('giro---', self.controller._control_steer)
         if self.controller._control_steer == 0.0:
-            alfa = (np.pi/2) * 0.0000001
+            alfa = (np.pi / 2) * 0.0000001
         else:
-            alfa = (np.pi/2) * self.controller._control_steer
+            alfa = (np.pi / 2) * self.controller._control_steer
 
         # Calculo de velocidad. Se obtendra el timestamp actual en formato unix (segundos), latitud y longitud.
         # Obtenidos los valores se calcula la velocidad
@@ -134,7 +135,6 @@ class SpecificWorker(GenericWorker):
         aux_timestamp = self.timestamp
         self.timestamp = self.gnss_sensor.timestamp
         speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
-
 
         """#Obtencion puntos
 
@@ -159,13 +159,13 @@ class SpecificWorker(GenericWorker):
         faroIzq = np.array([1, -1, 0.1])
 
         N = 50
-        vt = (15 * (speed / 24)) / 3.6 #(para pasar de km /h a m/s)
+        vt = (15 * (speed / 24)) / 3.6  # (para pasar de km /h a m/s)
 
         R = vt / alfa
         R = -R
 
-        if (speed !=0):
-            if((alfa > 0.01 or alfa < -0.01) and speed > 0):
+        if (speed != 0):
+            if ((alfa > 0.01 or alfa < -0.01) and speed > 0):
                 print(vt)
                 arc_T_izq = np.linspace(0, vt / R, N)
                 arc_T_dcho = np.linspace(0, vt / R, N)
@@ -239,62 +239,17 @@ class SpecificWorker(GenericWorker):
 
                 self.detect_with_yolo()
 
-                pygame.draw.line(self.display, (0,0,255), (iFaroIzq, jFaroIzq), (iIzq, jIzq), 5)
+                pygame.draw.line(self.display, (0, 0, 255), (iFaroIzq, jFaroIzq), (iIzq, jIzq), 5)
                 pygame.draw.line(self.display, (0, 0, 255), (iFaroDer, jFaroDer), (iDer, jDer), 5)
 
-
-
-
-        """     
-        puntoPintarDer = puntoDer-camara
-        puntoPintarIzq = puntoIzq-camara
-
-        pintarFaroDer = faroDer - camara
-        pintarFaroIzq = faroIzq - camara
-
-
-        #semejanza de triangulos
-        f = 320.0/np.tan(np.radians(110.0/2.0))
-        iDer = (f*puntoPintarDer[1])/puntoPintarDer[0] + self.width/2
-        jDer = (f*puntoPintarDer[2])/puntoPintarDer[0] + self.height/2
-        jDer = self.height - jDer
-
-        iFaroDer = (f * pintarFaroDer[1]) / pintarFaroDer[0] + self.width / 2
-        jFaroDer = (f * pintarFaroDer[2]) / pintarFaroDer[0] + self.height / 2
-        jFaroDer = self.height - jFaroDer
-
-        #print('-----------',puntoPintarDer[1], puntoPintarIzq[1] )
-
-        iIzq = (f * puntoPintarIzq[1]) / puntoPintarIzq[0] + self.width / 2
-        jIzq = (f * puntoPintarIzq[2]) / puntoPintarIzq[0] + self.height / 2
-        jIzq = self.height - jIzq;
-
-        iFaroIzq = (f * pintarFaroIzq[1]) / pintarFaroIzq[0] + self.width / 2
-        jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
-        jFaroIzq = self.height - jFaroIzq;
-
-
-
-                pygame.draw.circle(self.display, (0,0,255), [int(iDer), int(jDer)], 5)
-        pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq), int(jIzq)], 5)
-
-        pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroDer), int(jFaroDer)], 5)
-        pygame.draw.circle(self.display, (0, 0, 255), [int(iFaroIzq), int(jFaroIzq)], 5)
-        
-        
-        pygame.gfxdraw.polygon(self.display,
-                            [(iFaroIzq, jFaroIzq), (iFaroDer, jFaroDer), (iDer, jDer), (iIzq, jIzq)],
-                               (0, 0, 255))"""
-
         pygame.display.flip()
-
 
         return True
 
     def detect_with_yolo(self):
-        #surf = pygame.Surface(
-           # (self.d.network_width(), self.d.network_height()))  # I'm going to use 100x200 in examples
-        #data = pygame.image.tostring(surf, 'RGBA')
+        # surf = pygame.Surface(
+        # (self.d.network_width(), self.d.network_height()))  # I'm going to use 100x200 in examples
+        # data = pygame.image.tostring(surf, 'RGBA')
 
         img_arr = self.camera_manager.get_image_for_yolo(0)
         if img_arr is not None:
@@ -317,10 +272,18 @@ class SpecificWorker(GenericWorker):
                 w = int(w * 1280 / 416)
                 # imgs.append(box)
                 print(f'{detection.class_name.ljust(10)} | {detection.class_confidence * 100:.1f} % | {i}')
-                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x, y + h))
-                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x + w, y))
-                pygame.draw.line(self.display, (0, 255, 0), (x, y + h), (x + w, y + h))
-                pygame.draw.line(self.display, (0, 255, 0), (x + w, y), (x + w, y + h))
+                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x, y + h), 3)
+                pygame.draw.line(self.display, (0, 255, 0), (x, y), (x + w, y), 3)
+                pygame.draw.line(self.display, (0, 255, 0), (x, y + h), (x + w, y + h), 3)
+                pygame.draw.line(self.display, (0, 255, 0), (x + w, y), (x + w, y + h), 3)
+
+                pygame.font.init()  # you have to call this at the start,
+                # if you want to use this module.
+                myfont = pygame.font.SysFont('Comic Sans MS', 30)
+
+                textsurface = myfont.render(detection.class_name.ljust(10), False, (0, 255, 0))
+
+                self.display.blit(textsurface, (x, y))
 
     def parametric_circle(self, t, xc, yc, R):
         x = xc + R * np_cos(t)
@@ -345,6 +308,7 @@ class SpecificWorker(GenericWorker):
             return 0
 
         return (dist_km / dt) * 3.6 if time_end > time_start else 0
+
     def startup_check(self):
         QTimer.singleShot(200, QApplication.instance().quit)
 
@@ -361,7 +325,7 @@ class SpecificWorker(GenericWorker):
     # SUBSCRIPTION to updateSensorGNSS method from CarlaSensors interface
     #
     def CarlaSensors_updateSensorGNSS(self, gnssData):
-        #print(gnssData.latitude, gnssData.longitude)
+        # print(gnssData.latitude, gnssData.longitude)
         self.gnss_sensor.update(gnssData.latitude, gnssData.longitude, gnssData.altitude, gnssData.frame,
                                 gnssData.timestamp)
 
@@ -374,8 +338,6 @@ class SpecificWorker(GenericWorker):
 
     # ===================================================================
     # ===================================================================
-
-
 
     ######################
     # From the RoboCompCarlaVehicleControl you can call this methods:
@@ -399,4 +361,3 @@ class SpecificWorker(GenericWorker):
     # From the RoboCompCarlaSensors you can use this types:
     # RoboCompCarlaSensors.IMU
     # RoboCompCarlaSensors.GNSS
-
