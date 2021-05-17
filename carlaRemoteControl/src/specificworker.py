@@ -136,24 +136,7 @@ class SpecificWorker(GenericWorker):
         self.timestamp = self.gnss_sensor.timestamp
         speed = self.calc_velocity(km, aux_timestamp, self.timestamp)
 
-        """#Obtencion puntos
-
-        # Si va hacia delante, calculo poligono
-        if (not self.controller._control_reverse):
-            # Si está en movimiento, calculo puntos con velocidad y angulo de giro
-            if (speed > 0 ):
-                puntoDer = np.array([3*(speed/24)+1,0.5 + alfa,0.1])
-                puntoIzq = np.array([3*(speed/24)+1,-0.5 + alfa,0.1])
-            else: # Si no está en movimiento, no se tiene en cuenta el giro
-                puntoDer = np.array([3 * (speed / 24) + 1, 0.5, 0.1])
-                puntoIzq = np.array([3 * (speed / 24) + 1, -0.5, 0.1])
-        else: # Si va hacia detrás
-            puntoDer = np.array([3 * (0 / 24) + 1, 0.5, 0.1])
-            puntoIzq = np.array([3 * (0 / 24) + 1, -0.5, 0.1])
-
-        faroDer = np.array([1, 1, 0.1])
-        faroIzq = np.array([1, -1, 0.1])"""
-
+        #Definicion de la camara y de la posicion de los faros
         camara = np.array([0.0, -0.25, 1.0])
         faroDer = np.array([1, 1, 0.1])
         faroIzq = np.array([1, -1, 0.1])
@@ -166,9 +149,12 @@ class SpecificWorker(GenericWorker):
 
         #self.detect_with_yolo()
 
+        # En caso de que el coche este en movimiento se calcula los puntos y se detectan los objetos; sino solo se realiza la deteccion de los objetos 
         if (speed != 0):
+            # Se comprueba alfa (que determina el giro). En el caso de que se este girando se realiza el calculo de los puntos con el giro
             if ((alfa > 0.01 or alfa < -0.01) and speed > 0):
                 print(vt)
+                
                 arc_T_izq = np.linspace(0, vt / R, N)
                 arc_T_dcho = np.linspace(0, vt / R, N)
 
@@ -196,19 +182,20 @@ class SpecificWorker(GenericWorker):
                 jDer = (f * puntoPintarDchoZ) / puntoPintarDchoY + self.height / 2
                 jDer = self.height - jDer
 
+                # Deteccion de los objetos durante el giro
                 self.detect_with_yolo(iDer[-1], jDer[-1], iIzq[-1], jIzq[-1])
-
+                
+                
                 for i in range(N):
                     pygame.draw.circle(self.display, (0, 0, 255), [int(iDer[i]), int(jDer[i])], 5)
                     pygame.draw.circle(self.display, (0, 0, 255), [int(iIzq[i]), int(jIzq[i])], 5)
-            else:
-                # Si va hacia delante, calculo poligono
+            else: # Si va en linea recta, se calculan las lineas rectas
+                 # Calculo de puntos con velocidad 
                 if (not self.controller._control_reverse):
-                    # Si está en movimiento, calculo puntos con velocidad y angulo de giro
                     if (speed > 0):
                         puntoDer = np.array([3 * (speed / 24) + 1, 0.5 + alfa, 0.1])
                         puntoIzq = np.array([3 * (speed / 24) + 1, -0.5 + alfa, 0.1])
-                    else:  # Si no está en movimiento, no se tiene en cuenta el giro
+                    else:  
                         puntoDer = np.array([3 * (speed / 24) + 1, 0.5, 0.1])
                         puntoIzq = np.array([3 * (speed / 24) + 1, -0.5, 0.1])
                 else:  # Si va hacia detrás
@@ -241,6 +228,7 @@ class SpecificWorker(GenericWorker):
                 jFaroIzq = (f * pintarFaroIzq[2]) / pintarFaroIzq[0] + self.height / 2
                 jFaroIzq = self.height - jFaroIzq;
 
+                # Deteccion de los objetos 
                 self.detect_with_yolo(iDer, jDer, iIzq, jIzq)
 
                 pygame.draw.line(self.display, (0, 0, 255), (iFaroIzq, jFaroIzq), (iIzq, jIzq), 5)
